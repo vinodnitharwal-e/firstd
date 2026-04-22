@@ -2,17 +2,14 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven-3.9.9'   // MUST match exactly what you configured in Jenkins
+        maven 'Maven-3.9.9'
     }
 
     environment {
-    DOCKER_IMAGE = "vinodnitharwal9/firstd:${BUILD_NUMBER}"
-}
+        DOCKER_IMAGE = "vinodnitharwal9/firstd:${BUILD_NUMBER}"
+    }
 
     stages {
-
-        //  Jenkins will already checkout automatically (Pipeline from SCM)
-        // But if you want explicit GitHub checkout, keep this:
 
         stage('Checkout Code') {
             steps {
@@ -34,6 +31,12 @@ pipeline {
             }
         }
 
+        stage('Verify Docker Image') {
+            steps {
+                bat 'docker images'
+            }
+        }
+
         stage('Push Docker Image') {
             steps {
                 withCredentials([usernamePassword(
@@ -41,22 +44,31 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    bat '''
-                    echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                    bat """
+                    docker login -u %DOCKER_USER% -p %DOCKER_PASS%
                     docker push %DOCKER_IMAGE%
-                    '''
+                    """
                 }
             }
         }
+
         stage('Run Container') {
-		    steps {
-		        bat '''
-		        docker stop employee-container || true
-		        docker rm employee-container || true
-		        docker run -d -p 8082:8082 --name employee-container %DOCKER_IMAGE%
-		        '''
-		    }
-		}
-        
+            steps {
+                bat '''
+                docker stop employee-container || exit 0
+                docker rm employee-container || exit 0
+                docker run -d -p 8082:8082 --name employee-container %DOCKER_IMAGE%
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline executed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check logs above.'
+        }
     }
 }
