@@ -52,12 +52,12 @@ pipeline {
             }
         }
 
-        stage('Run Container') {
+        stage('deploy') {
             steps {
                 bat '''
                 docker stop employee-container || exit 0
                 docker rm employee-container || exit 0
-                docker run -d -p 8082:8082 --name employee-container %DOCKER_IMAGE%
+                docker run -d -p 9082:8082 --name employee-container %DOCKER_IMAGE%:latest
                 '''
             }
         }
