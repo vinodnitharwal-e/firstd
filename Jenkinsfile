@@ -48,5 +48,15 @@ pipeline {
                 }
             }
         }
+        stage('Run Container') {
+		    steps {
+		        bat '''
+		        docker stop employee-container || true
+		        docker rm employee-container || true
+		        docker run -d -p 8181:8181 --name employee-container %DOCKER_IMAGE%
+		        '''
+		    }
+		}
+        
     }
 }
