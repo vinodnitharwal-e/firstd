@@ -53,13 +53,14 @@ pipeline {
         }
 
         stage('Deploy') {
-	      steps {
-	        
-	        bat "docker stop springboot-app || exit 0"
-	        bat "docker rm springboot-app || exit 0"
-	        bat "docker run -d -p 9090:8080 --name springboot-app %DOCKER_IMAGE%:latest"
-	      }
+      steps {
+        
+        bat "docker stop springboot-app || exit 0"
+        bat "docker rm springboot-app || exit 0"
+        bat "docker run -d -p 9090:8080 --name springboot-app %DOCKER_IMAGE%:latest"
+      }
     }
+   }
 
     post {
         success {
