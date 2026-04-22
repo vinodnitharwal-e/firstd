@@ -52,14 +52,16 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-      steps {
-        
-        bat "docker stop springboot-app || exit 0"
-        bat "docker rm springboot-app || exit 0"
-        bat "docker run -d -p 9090:8080 --name springboot-app %DOCKER_IMAGE%:latest"
-      }
-    }
+       stage('Run Container') {
+        steps {
+            bat '''
+            docker stop employee-container
+            docker rm employee-container
+            docker run -d -p 8181:8181 --name employee-container %DOCKER_IMAGE%
+            docker ps -a
+            '''
+                }
+        }
    }
 
     post {
